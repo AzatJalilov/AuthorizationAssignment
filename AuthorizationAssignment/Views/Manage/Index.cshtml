@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "Manage";
+}
+
+<h2>@ViewBag.Title.</h2>
+
+<div>
+        
+            @foreach (var session in ViewBag.Sessions)
+            {
+                <div>
+                    <span>
+                        @using (Html.BeginForm("Disconnect", "Manage", new { sessionId = session.Key, userId = session.Value.UserName }))
+                        {
+                            @session.Value.UserName
+                            <button type="submit" class="btn btn-default" id="@session.Key" name="provider">Disconnect</button>
+                        }
+                    </span>
+                </div>
+                            
+            
+            }
+        <br />
+    
+</div>

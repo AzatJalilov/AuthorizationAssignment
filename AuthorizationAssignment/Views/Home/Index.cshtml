@@ -1,0 +1,91 @@
+﻿@{
+    ViewBag.Title = "Welcome Page";
+}
+@section scripts {
+    <script src="~/Scripts/jquery.signalR-2.2.1.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+
+    <script>
+        
+        $(function () {
+            
+            function encode(text) {
+                var key = CryptoJS.enc.Base64.parse($('#textBox4').val());
+                var iv = CryptoJS.enc.Utf8.parse('8080808080808080');
+                var encryptedlogin = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(text), key,
+                    {
+                        keySize: 256 / 8,
+                        iv: iv,
+                        mode: CryptoJS.mode.CBC,
+                        padding: CryptoJS.pad.Pkcs7
+                    });
+                return encryptedlogin.ciphertext.toString(CryptoJS.enc.Base64);
+            }
+
+            var session = $.connection.sessionHub;
+            session.client.disconnect = function () {
+                $.connection.hub.stop();
+                document.getElementById('logoutForm').submit()
+            };
+            $.connection.hub.start().done(function () {
+                //session.server.connect();
+            });
+            $(document).ready(function () {
+                $('#button').on('click', function () {
+                    $.ajax({
+                        type: "GET",
+                        url: "/home/GetNewKey",
+                        data: param = "",
+                        contentType: "application/text; charset=utf-8",
+                        dataType: "text",
+                        success: successFunc,
+                        error: errorFunc
+                    });
+                    
+                    function successFunc(data, status) {
+                        $('#textBox4').val(data);
+                        $('#textBox2').val(encode($('#textBox1').val()));
+                        $.ajax({
+                            type: "GET",
+                            url: "/home/Decrypt",
+                            data: { encryptedMessage: $('#textBox2').val() },
+                            contentType: "application/text; charset=utf-8",
+                            dataType: "text",
+                            success: function (d, s) {
+                                $('#textBox3').val(d);
+                            },
+                            error: errorFunc
+                        });
+                    }
+                    
+                    function errorFunc() {
+                        alert('error');
+                    }
+                });
+            });
+
+        });
+
+    </script>
+}
+<div class="jumbotron">
+    Hello, @User.Identity.Name!
+</div>
+
+<div class="container">
+    @Html.Label("textBox1")
+    <input type="text" id="textBox1" /> <br />
+    @Html.Label("textBox2")
+    <input type="text" id="textBox2" /> <br />
+    @Html.Label("textBox3")
+    <input type="text" id="textBox3" /> <br />
+    <input type="hidden" id="textBox4" /> <br />
+
+
+    <input type="button" id="button" value="Ok"  />
+</div>
+
+
+
+
