@@ -15,7 +15,7 @@ using Microsoft.AspNet.SignalR;
 
 namespace AuthorizationAssignment.Controllers
 {
-    [System.Web.Mvc.Authorize]
+    [System.Web.Mvc.Authorize(Roles ="Master")]
     public class ManageController : Controller
     {
         public ManageController()
@@ -26,7 +26,7 @@ namespace AuthorizationAssignment.Controllers
         // GET: /Manage/Index
         public ActionResult Index()
         {
-            ViewBag.Sessions = SessionHub.MyUsers;
+            ViewBag.Sessions = SessionHub.MyUsers.Where(x=> x.Value.UserName != User.Identity.Name);
             
             return View();
         }
