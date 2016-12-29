@@ -48,7 +48,7 @@ namespace AuthorizationAssignment
         {
             lock (padlock)
             {
-                _sessions.Add(Session.SessionID, User.Identity.Name);
+                _sessions[Session.SessionID] = User.Identity.Name;
             }
         }
         protected void Session_End(object sender, EventArgs e)

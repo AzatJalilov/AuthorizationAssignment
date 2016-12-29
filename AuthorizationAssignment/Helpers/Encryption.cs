@@ -10,7 +10,6 @@ namespace AuthorizationAssignment.Helpers
 {
     public class Encryption
     {
-        public const string IV = "8080808080808080";
         public const int KEY_SIZE = 256;
         public static string CreateKey(int size)
         {
@@ -100,6 +99,7 @@ namespace AuthorizationAssignment.Helpers
                 rijAlg.FeedbackSize = 128;
                 rijAlg.KeySize = KEY_SIZE;
 
+
                 rijAlg.Key = key;
                 rijAlg.IV = iv;
 
@@ -134,23 +134,48 @@ namespace AuthorizationAssignment.Helpers
             return plaintext;
         }
 
-        public static string DecryptStringAES(string cipherText, string key)
+        public static string DecryptStringAES(string cipherText, string key, string iv)
         {
             var keybytes = Convert.FromBase64String(key);
-            var iv = Encoding.UTF8.GetBytes(IV);
+            var ivBytes = Convert.FromBase64String(iv);
 
             var encrypted = Convert.FromBase64String(cipherText);
-            var decriptedFromJavascript = DecryptStringFromBytes(encrypted, keybytes, iv);
+            var decriptedFromJavascript = DecryptStringFromBytes(encrypted, keybytes, ivBytes);
             return string.Format(decriptedFromJavascript);
         }
 
-        public static string EncryptStringAES(string text, string key)
+        public static string EncryptStringAES(string text, string key, string iv)
         {
             var keybytes = Convert.FromBase64String(key);
-            var iv = Encoding.UTF8.GetBytes(IV);
+            var ivBytes = Convert.FromBase64String(iv);
 
-            var encriptedFromJavascript = EncryptStringToBytes(text, keybytes, iv);
+            var encriptedFromJavascript = EncryptStringToBytes(text, keybytes, ivBytes);
             return Convert.ToBase64String(encriptedFromJavascript);
+        }
+        public static byte[] EncryptionRSA(byte[] Data, string xmlString, bool DoOAEPPadding)
+        {
+            try
+            {
+                byte[] encryptedData;
+                using (RSACryptoServiceProvider RSA = new RSACryptoServiceProvider())
+                {
+                    RSA.FromXmlString(xmlString);
+                    encryptedData = RSA.Encrypt(Data, true);
+                }
+                return encryptedData;
+            }
+            catch (CryptographicException e)
+            {
+                return null;
+            }
+        }
+
+        public static string EncryptStringRSA(string text, string xmlString)
+        {
+            UnicodeEncoding ByteConverter = new UnicodeEncoding();
+            var textBytes = ByteConverter.GetBytes(text);
+            var encripted = EncryptionRSA(textBytes, xmlString, true);
+            return Convert.ToBase64String(encripted);
         }
 
     }
